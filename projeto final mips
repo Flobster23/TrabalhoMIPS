@@ -1,0 +1,153 @@
+.data #Seção usada para armazenar dados
+    	msg1: .asciiz "Digite o primeiro numero: "
+    	msg2: .asciiz "Digite o segundo numero: "
+    	msg3: .asciiz "Digite o terceiro numero: "
+    	msgSort: .asciiz "Numeros em ordem crescente: "
+    	msgFat: .asciiz "Fatoriais: "
+    	novaLinha: .asciiz "\n"
+
+.text #Seção onde as instruções de código ficam armazenadas
+.globl main #Especifica que a função main será o ponto de entrada do programa
+
+main:
+    	# Ler os três números de entrada
+    	li $v0, 4               # Imprimir string
+    	la $a0, msg1         
+    	syscall                 
+
+    	li $v0, 5               # Código para ler um inteiro
+    	syscall                 
+    	move $t0, $v0           
+
+    	li $v0, 4               
+    	la $a0, msg2         
+    	syscall                 
+
+    	li $v0, 5               
+    	syscall                 
+    	move $t1, $v0          
+
+   	li $v0, 4               
+    	la $a0, msg3        
+    	syscall                 
+
+    	li $v0, 5               
+    	syscall                 
+    	move $t2, $v0           
+
+    	jal sort
+
+    	# Imprimir os números em ordem crescente
+    	li $v0, 4               # Imprimir string
+    	la $a0, msgSort
+    	syscall
+    
+     	li $v0, 4               # Imprimir nova linha
+    	la $a0, novaLinha
+    	syscall
+
+    	li $v0, 1               # Imprimir o primeiro número
+    	move $a0, $t0
+    	syscall
+
+    	li $v0, 4               
+    	la $a0, novaLinha
+    	syscall
+
+    	li $v0, 1               
+    	move $a0, $t1
+    	syscall
+
+    	li $v0, 4               
+    	la $a0, novaLinha
+    	syscall
+
+    	li $v0, 1               
+	move $a0, $t2
+    	syscall
+
+    	li $v0, 4               
+    	la $a0, novaLinha
+    	syscall
+    
+    	li $v0, 4               
+    	la $a0, msgFat
+    	syscall
+    
+     	li $v0, 4              
+    	la $a0, novaLinha
+    	syscall
+
+    	# Calcular e imprimir o fatorial dos números
+    	# Fatorial do primeiro número
+    	move $a0, $t0           
+    	jal fatorial           
+    	move $t3, $v0           
+    	jal print_fatorial     
+
+    	# Fatorial do segundo número
+    	move $a0, $t1           
+    	jal fatorial           
+    	move $t3, $v0           
+    	jal print_fatorial     
+
+    	# Fatorial do terceiro número
+    	move $a0, $t2           
+    	jal fatorial           
+    	move $t3, $v0           
+    	jal print_fatorial     
+
+    	J FIM
+
+# Função para ordenar os números em ordem crescente
+sort:
+    	# Trocar t0 e t1 se necessário
+    	ble $t0, $t1, semTroca1
+    	move $t3, $t0
+    	move $t0, $t1
+    	move $t1, $t3
+	semTroca1:
+    
+    	# Trocar t1 e t2 se necessário
+    	ble $t1, $t2, semTroca2
+    	move $t3, $t1
+    	move $t1, $t2
+    	move $t2, $t3
+	semTroca2:
+
+    	# Trocar t0 e t1 novamente se necessário
+    	ble $t0, $t1, semTroca3
+    	move $t3, $t0
+    	move $t0, $t1
+    	move $t1, $t3
+	semTroca3:
+    	jr $ra                  
+
+# Função para calcular o fatorial dos numeros
+fatorial:
+    	li $v0, 1               # Inicializa o resultado em 1
+    	move $t4, $v0           
+    	blez $a0, return_1      # Se o número for <= 0, retorna 1
+    	fatorial_loop:
+        	mul $t4, $t4, $a0   # t4 = t4 * n
+        	sub $a0, $a0, 1     # n = n - 1
+        	bgtz $a0, fatorial_loop # Continua até n > 0
+    	move $v0, $t4           
+    	jr $ra                  
+
+	return_1:
+    	li $v0, 1               
+    	jr $ra
+
+# Função para imprimir o fatorial de um número
+print_fatorial:
+    	li $v0, 1               
+    	move $a0, $t3           # Número armazenado em $t3
+    	syscall
+
+    	li $v0, 4               
+    	la $a0, novaLinha
+    	syscall
+    	jr $ra
+    
+    	FIM:
